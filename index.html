@@ -3,47 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <title>Gestor de Tareas</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; margin: 20px; max-width: 600px; }
+    input, button { padding: 8px; margin: 4px 0; width: 100%; }
+    ul { list-style-type: none; padding: 0; }
+    li { background: #f2f2f2; margin: 5px 0; padding: 10px; border-radius: 5px; }
+  </style>
 </head>
-<body class="bg-light p-5">
-  <div class="container">
-    <h1 class="mb-4">📋 Mis Tareas</h1>
-    <form id="form-tarea" class="mb-3 d-flex gap-2">
-      <input type="text" id="descripcion" class="form-control" placeholder="Escribe una nueva tarea" required>
-      <button class="btn btn-primary" type="submit">Agregar</button>
-    </form>
-    <ul id="lista-tareas" class="list-group"></ul>
-  </div>
+<body>
+  <h2>📋 Mis Tareas</h2>
+  <input type="text" id="tareaInput" placeholder="Nueva tarea...">
+  <button onclick="agregarTarea()">Agregar</button>
+  <ul id="listaTareas"></ul>
 
   <script>
-    const apiUrl = '/api/index.php';
+    const API_URL = '/api/';
 
-    const cargarTareas = async () => {
-      const res = await fetch(apiUrl);
+    async function obtenerTareas() {
+      const res = await fetch(API_URL);
       const tareas = await res.json();
-      const lista = document.getElementById('lista-tareas');
+      const lista = document.getElementById('listaTareas');
       lista.innerHTML = '';
       tareas.forEach(t => {
         const li = document.createElement('li');
         li.textContent = t.descripcion;
-        li.className = 'list-group-item';
         lista.appendChild(li);
       });
-    };
+    }
 
-    document.getElementById('form-tarea').addEventListener('submit', async e => {
-      e.preventDefault();
-      const descripcion = document.getElementById('descripcion').value;
-      await fetch(apiUrl, {
+    async function agregarTarea() {
+      const input = document.getElementById('tareaInput');
+      const descripcion = input.value.trim();
+      if (descripcion === '') return;
+      await fetch(API_URL, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ descripcion })
       });
-      document.getElementById('descripcion').value = '';
-      cargarTareas();
-    });
+      input.value = '';
+      obtenerTareas();
+    }
 
-    cargarTareas();
+    obtenerTareas();
   </script>
 </body>
 </html>
