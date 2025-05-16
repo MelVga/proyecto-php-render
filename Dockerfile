@@ -1,13 +1,12 @@
-FROM php:8.2-apache
+FROM php:8.1-apache
 
-# Instala extensiones necesarias para PostgreSQL
-RUN docker-php-ext-install pdo pdo_pgsql
+# Instalar las herramientas necesarias para compilar y la librería de PostgreSQL
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql
 
-# Copia el contenido del proyecto al servidor
+# Copiar archivos del proyecto al contenedor
 COPY . /var/www/html/
 
-# Establece permisos
-RUN chown -R www-data:www-data /var/www/html/
-
-# Expone el puerto
+# Opcional: Exponer puerto 80
 EXPOSE 80
