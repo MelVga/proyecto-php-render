@@ -1,18 +1,18 @@
 <?php
-$host = $_ENV["DB_HOST"];
-$db   = $_ENV["DB_NAME"];
-$user = $_ENV["DB_USER"];
-$pass = $_ENV["DB_PASS"];
-$port = $_ENV["DB_PORT"];
+require 'conexion.php';
 
-try {
-    $conexion = new PDO("pgsql:host=$host;port=$port;dbname=$db", $user, $pass);
-    $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $stmt = $conexion->query("SELECT * FROM tareas");
-    $tareas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($tareas);
-
-} catch (PDOException $e) {
-    echo "Error de conexión: " . $e->getMessage();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents("php://input"), true);
+    $descripcion = $input['descripcion'] ?? '';
+    if ($descripcion !== '') {
+        $stmt = $pdo->prepare("INSERT INTO tareas (descripcion) VALUES (:descripcion)");
+        $stmt->execute(['descripcion' => $descripcion]);
+    }
+    echo json_encode(['status' => 'ok']);
+    exit;
 }
+
+$stmt = $pdo->query("SELECT * FROM tareas ORDER BY id DESC");
+$tareas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+header('Content-Type: application/json');
+echo json_encode($tareas);
