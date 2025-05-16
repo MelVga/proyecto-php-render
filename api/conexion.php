@@ -1,16 +1,15 @@
 <?php
-$host = 'dpg-d0jp2ll6ubrc73amgba0-a.oregon-postgres.render.com';
-$db   = 'bd_tareas';
-$user = 'bd_tareas_user';
-$pass = 'UQiXp3T5SUPWPUeI25Vc5JVIJDIDZ7bt';
-$port = '5432';
+$host = "dpg-d0jp2ll6ubrc73amgba0-a.oregon-postgres.render.com";
+$port = "5432";
+$dbname = "bd_tareas";
+$user = "bd_tareas_user";
+$password = "UQiXp3T5SUPWPUeI25Vc5JVIJDIDZ7bt";
 
-$dsn = "pgsql:host=$host;port=$port;dbname=$db";
+$conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password sslmode=require");
 
-try {
-    $pdo = new PDO($dsn, $user, $pass);
-} catch (PDOException $e) {
-    echo json_encode(['error' => $e->getMessage()]);
-    exit;
+if (!$conn) {
+    http_response_code(500);
+    echo json_encode(["error" => "Error de conexión: " . pg_last_error()]);
+    exit();
 }
-
+?>
