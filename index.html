@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista de Tareas</title>
   <style>
     body {
@@ -13,12 +13,11 @@
     }
     h1 {
       text-align: center;
-      color: #333;
     }
     form {
       display: flex;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
     input[type="text"] {
       flex: 1;
@@ -28,12 +27,11 @@
     button {
       padding: 8px 16px;
       font-size: 16px;
-      cursor: pointer;
-      background-color: #007BFF;
+      background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 3px;
-      transition: background-color 0.3s;
+      border-radius: 4px;
+      cursor: pointer;
     }
     button:hover {
       background-color: #0056b3;
@@ -44,84 +42,72 @@
     }
     ul li {
       padding: 10px;
-      border-bottom: 1px solid #ddd;
-      font-size: 18px;
+      border-bottom: 1px solid #ccc;
     }
-    #errorMsg {
-      color: red;
-      margin-top: 10px;
+    .links {
+      margin-top: 30px;
       text-align: center;
     }
-
-    /* Responsivo */
-    @media (max-width: 480px) {
-      body {
-        margin: 10px;
-      }
-      button, input[type="text"] {
-        font-size: 14px;
-      }
-      ul li {
-        font-size: 16px;
-      }
+    .links a {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .links a:hover {
+      background-color: #218838;
     }
   </style>
 </head>
 <body>
   <h1>Lista de Tareas</h1>
 
-  <form id="formAgregarTarea">
-    <input type="text" id="descripcion" placeholder="Nueva tarea" required />
-    <button type="submit">Agregar tarea</button>
+  <form id="formAgregar">
+    <input type="text" id="descripcion" placeholder="Escribe una tarea" required>
+    <button type="submit">Agregar</button>
   </form>
 
-  <ul id="listaTareas">
-    <!-- Aquí se cargarán las tareas -->
-  </ul>
+  <ul id="listaTareas"></ul>
 
-  <div id="errorMsg"></div>
+  <div class="links">
+    <a href="https://drive.google.com" target="_blank">Google Drive</a>
+    <a href="https://github.com" target="_blank">GitHub</a>
+    <a href="https://dropbox.com" target="_blank">Dropbox</a>
+  </div>
 
   <script>
-    // Función para cargar tareas desde la API
     function cargarTareas() {
       fetch('api/index.php')
-        .then(response => {
-          if (!response.ok) throw new Error('Error en la respuesta');
-          return response.json();
-        })
-        .then(tareas => {
+        .then(response => response.json())
+        .then(data => {
           const lista = document.getElementById('listaTareas');
           lista.innerHTML = '';
-
-          if (tareas.length === 0) {
-            lista.innerHTML = '<li>No hay tareas</li>';
-          } else {
-            tareas.forEach(tarea => {
+          if (Array.isArray(data)) {
+            data.forEach(tarea => {
               const li = document.createElement('li');
               li.textContent = tarea.descripcion;
               lista.appendChild(li);
             });
           }
-          document.getElementById('errorMsg').textContent = '';
         })
         .catch(() => {
-          document.getElementById('errorMsg').textContent = 'Error al cargar tareas.';
+          console.error('Error al cargar tareas');
         });
     }
 
-    // Event listener para el formulario de agregar tarea
-    document.getElementById('formAgregarTarea').addEventListener('submit', function (e) {
+    document.getElementById('formAgregar').addEventListener('submit', function (e) {
       e.preventDefault();
-
       const descripcion = document.getElementById('descripcion').value.trim();
-      if (descripcion === '') {
-        alert('Por favor escribe una tarea');
-        return;
-      }
+      if (!descripcion) return;
 
       fetch('api/agregar.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ descripcion })
       })
         .then(response => response.json())
@@ -129,15 +115,13 @@
           if (data.success) {
             document.getElementById('descripcion').value = '';
             cargarTareas();
-            document.getElementById('errorMsg').textContent = '';
           } else {
             alert('Error al agregar la tarea');
           }
         })
-        .catch(() => alert('Error en la conexión'));
+        .catch(() => alert('Error al conectar con el servidor'));
     });
 
-    // Carga inicial de tareas
     cargarTareas();
   </script>
 </body>
