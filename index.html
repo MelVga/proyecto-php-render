@@ -1,127 +1,172 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lista de Tareas</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 10px;
+      background: #f4f4f4;
+      padding: 20px;
+      margin: 0;
     }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
     h1 {
       text-align: center;
+      color: #333;
     }
+
     form {
       display: flex;
+      flex-direction: column;
       gap: 10px;
-      margin-bottom: 20px;
     }
+
     input[type="text"] {
-      flex: 1;
-      padding: 8px;
-      font-size: 16px;
-    }
-    button {
-      padding: 8px 16px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    ul li {
       padding: 10px;
-      border-bottom: 1px solid #ccc;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
-    .links {
-      margin-top: 30px;
-      text-align: center;
-    }
-    .links a {
-      display: inline-block;
-      margin: 5px;
+
+    button {
       padding: 10px;
       background-color: #28a745;
+      border: none;
       color: white;
-      text-decoration: none;
-      border-radius: 4px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
     }
-    .links a:hover {
+
+    button:hover {
       background-color: #218838;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .enlaces {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .enlaces a {
+      margin: 0 10px;
+      text-decoration: none;
+      color: #007bff;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 10px;
+        padding: 15px;
+      }
+
+      input[type="text"], button {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Lista de Tareas</h1>
+  <div class="container">
+    <h1>Lista de Tareas</h1>
 
-  <form id="formAgregar">
-    <input type="text" id="descripcion" placeholder="Escribe una tarea" required>
-    <button type="submit">Agregar</button>
-  </form>
+    <form id="formTarea">
+      <input type="text" id="descripcion" placeholder="Escribe una tarea..." required>
+      <button type="submit">Agregar tarea</button>
+    </form>
 
-  <ul id="listaTareas"></ul>
+    <div class="error" id="mensajeError" style="display: none;"></div>
 
-  <div class="links">
-    <a href="https://drive.google.com" target="_blank">Google Drive</a>
-    <a href="https://github.com" target="_blank">GitHub</a>
-    <a href="https://dropbox.com" target="_blank">Dropbox</a>
+    <ul id="listaTareas"></ul>
+
+    <div class="enlaces">
+      <p>Enlaces a servicios en la nube:</p>
+      <a href="https://github.com" target="_blank">GitHub</a>
+      <a href="https://drive.google.com" target="_blank">Google Drive</a>
+    </div>
   </div>
 
   <script>
-    function cargarTareas() {
-      fetch('api/index.php')
-        .then(response => response.json())
-        .then(data => {
-          const lista = document.getElementById('listaTareas');
-          lista.innerHTML = '';
-          if (Array.isArray(data)) {
-            data.forEach(tarea => {
-              const li = document.createElement('li');
-              li.textContent = tarea.descripcion;
-              lista.appendChild(li);
-            });
-          }
-        })
-        .catch(() => {
-          console.error('Error al cargar tareas');
-        });
-    }
+    const form = document.getElementById("formTarea");
+    const descripcionInput = document.getElementById("descripcion");
+    const listaTareas = document.getElementById("listaTareas");
+    const mensajeError = document.getElementById("mensajeError");
 
-    document.getElementById('formAgregar').addEventListener('submit', function (e) {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const descripcion = document.getElementById('descripcion').value.trim();
+      const descripcion = descripcionInput.value.trim();
       if (!descripcion) return;
 
-      fetch('api/agregar.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ descripcion })
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            document.getElementById('descripcion').value = '';
-            cargarTareas();
-          } else {
-            alert('Error al agregar la tarea');
-          }
-        })
-        .catch(() => alert('Error al conectar con el servidor'));
+      try {
+        const res = await fetch("api/agregar.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ descripcion })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          descripcionInput.value = "";
+          cargarTareas();
+        } else {
+          mostrarError(data.message || "Error al agregar la tarea.");
+        }
+      } catch (err) {
+        mostrarError("Error al conectar con el servidor.");
+      }
     });
 
+    function mostrarError(mensaje) {
+      mensajeError.textContent = mensaje;
+      mensajeError.style.display = "block";
+      setTimeout(() => {
+        mensajeError.style.display = "none";
+      }, 3000);
+    }
+
+    async function cargarTareas() {
+      try {
+        const res = await fetch("api/index.php");
+        const tareas = await res.json();
+
+        listaTareas.innerHTML = "";
+        tareas.forEach(t => {
+          const li = document.createElement("li");
+          li.textContent = t.descripcion;
+          listaTareas.appendChild(li);
+        });
+      } catch (err) {
+        mostrarError("Error al cargar tareas.");
+      }
+    }
+
+    // Inicializa
     cargarTareas();
   </script>
 </body>
