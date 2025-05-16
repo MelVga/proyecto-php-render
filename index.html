@@ -6,47 +6,46 @@
   <title>Lista de Tareas</title>
   <style>
     body {
-      font-family: sans-serif;
-      margin: 2rem;
-      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f3f3f3;
     }
-
+    header {
+      background-color: #4CAF50;
+      padding: 1rem;
+      color: white;
+      text-align: center;
+    }
     .container {
+      padding: 2rem;
       max-width: 600px;
       margin: auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-
     ul {
       list-style: none;
       padding: 0;
     }
-
     li {
-      background: #e0e0e0;
-      margin-bottom: 10px;
-      padding: 10px;
+      background: white;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .enlaces {
+      margin-top: 2rem;
+      text-align: center;
+    }
+    .enlaces a {
+      display: inline-block;
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      background-color: #2196F3;
+      color: white;
+      text-decoration: none;
       border-radius: 5px;
     }
-
-    .links {
-      margin-top: 20px;
-    }
-
-    .links a {
-      display: block;
-      color: #007bff;
-      text-decoration: none;
-      margin: 5px 0;
-    }
-
-    .links a:hover {
-      text-decoration: underline;
-    }
-
     @media (max-width: 600px) {
       .container {
         padding: 1rem;
@@ -55,35 +54,39 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <header>
     <h1>Lista de Tareas</h1>
-    <ul id="tareas"></ul>
-
-    <div class="links">
-      <h2>Plataformas</h2>
+  </header>
+  <div class="container">
+    <ul id="lista-tareas">
+      <li>Cargando tareas...</li>
+    </ul>
+    <div class="enlaces">
+      <a href="https://drive.google.com" target="_blank">Google Drive</a>
       <a href="https://github.com" target="_blank">GitHub</a>
-      <a href="https://www.youtube.com" target="_blank">YouTube</a>
       <a href="https://render.com" target="_blank">Render</a>
     </div>
   </div>
 
   <script>
-    fetch('api/index.php')
+    fetch('/api/index.php')
       .then(response => response.json())
       .then(data => {
-        const lista = document.getElementById('tareas');
-        if (data.error) {
-          lista.innerHTML = `<li style="color:red;">${data.error}</li>`;
-          return;
+        const lista = document.getElementById('lista-tareas');
+        lista.innerHTML = '';
+        if (data.length === 0) {
+          lista.innerHTML = '<li>No hay tareas registradas.</li>';
+        } else {
+          data.forEach(tarea => {
+            const li = document.createElement('li');
+            li.textContent = tarea.descripcion;
+            lista.appendChild(li);
+          });
         }
-        data.forEach(tarea => {
-          const li = document.createElement('li');
-          li.textContent = tarea.descripcion;
-          lista.appendChild(li);
-        });
       })
       .catch(error => {
-        console.error('Error al cargar tareas:', error);
+        document.getElementById('lista-tareas').innerHTML = '<li>Error al cargar tareas.</li>';
+        console.error('Error:', error);
       });
   </script>
 </body>
