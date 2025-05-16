@@ -1,8 +1,8 @@
 <?php
-$host = getenv("dpg-d0jp2ll6ubrc73amgba0-a.oregon-postgres.render.com");
-$dbname = getenv("bd_tareas");
-$user = getenv("bd_tareas_user");
-$password = getenv("UQiXp3T5SUPWPUeI25Vc5JVIJDIDZ7bt");
+$host = "dpg-d0jp2ll6ubrc73amgba0-a.oregon-postgres.render.com";
+$dbname = "bd_tareas";
+$user = "bd_tareas_user";
+$password = "UQiXp3T5SUPWPUeI25Vc5JVIJDIDZ7bt";
 
 try {
     $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password, [
