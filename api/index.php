@@ -1,15 +1,14 @@
 <?php
-require_once 'conexion.php';
+header('Content-Type: application/json');
+include("conexion.php");
 
-$query = "SELECT id, descripcion FROM tareas";
-$result = pg_query($conn, $query);
+$result = pg_query($conn, "SELECT id, descripcion FROM tareas ORDER BY id DESC");
 
 $tareas = [];
 
-while ($fila = pg_fetch_assoc($result)) {
-    $tareas[] = $fila;
+while ($row = pg_fetch_assoc($result)) {
+    $tareas[] = $row;
 }
 
-header('Content-Type: application/json');
 echo json_encode($tareas);
 ?>

@@ -7,87 +7,115 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f3f3f3;
-    }
-    header {
-      background-color: #4CAF50;
-      padding: 1rem;
-      color: white;
-      text-align: center;
+      margin: 0; padding: 20px;
+      background: #f4f4f4;
+      color: #333;
     }
     .container {
-      padding: 2rem;
-      max-width: 600px;
+      max-width: 500px;
       margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px;
+      font-size: 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
     }
     ul {
       list-style: none;
       padding: 0;
     }
     li {
-      background: white;
-      padding: 1rem;
-      margin-bottom: 0.5rem;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
     }
     .enlaces {
-      margin-top: 2rem;
       text-align: center;
+      margin-top: 20px;
     }
     .enlaces a {
-      display: inline-block;
-      margin: 0.5rem;
-      padding: 0.5rem 1rem;
-      background-color: #2196F3;
-      color: white;
+      margin: 0 10px;
+      color: #007bff;
       text-decoration: none;
-      border-radius: 5px;
-    }
-    @media (max-width: 600px) {
-      .container {
-        padding: 1rem;
-      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Lista de Tareas</h1>
-  </header>
   <div class="container">
-    <ul id="lista-tareas">
-      <li>Cargando tareas...</li>
-    </ul>
+    <h1>Lista de Tareas</h1>
+    <form id="form-tarea">
+      <input type="text" id="descripcion" placeholder="Nueva tarea..." required />
+      <button type="submit">Agregar</button>
+    </form>
+    <ul id="lista-tareas">Cargando tareas...</ul>
     <div class="enlaces">
-      <a href="https://drive.google.com" target="_blank">Google Drive</a>
       <a href="https://github.com" target="_blank">GitHub</a>
-      <a href="https://render.com" target="_blank">Render</a>
+      <a href="https://www.youtube.com" target="_blank">YouTube</a>
     </div>
   </div>
 
   <script>
-    fetch('/api/index.php')
-      .then(response => response.json())
-      .then(data => {
-        const lista = document.getElementById('lista-tareas');
-        lista.innerHTML = '';
-        if (data.length === 0) {
-          lista.innerHTML = '<li>No hay tareas registradas.</li>';
-        } else {
-          data.forEach(tarea => {
-            const li = document.createElement('li');
-            li.textContent = tarea.descripcion;
-            lista.appendChild(li);
-          });
-        }
+    const form = document.getElementById("form-tarea");
+    const lista = document.getElementById("lista-tareas");
+
+    function cargarTareas() {
+      fetch('/api/index.php')
+        .then(res => res.json())
+        .then(data => {
+          lista.innerHTML = '';
+          if (data.length === 0) {
+            lista.innerHTML = '<li>No hay tareas registradas.</li>';
+          } else {
+            data.forEach(tarea => {
+              const li = document.createElement('li');
+              li.textContent = tarea.descripcion;
+              lista.appendChild(li);
+            });
+          }
+        })
+        .catch(error => {
+          lista.innerHTML = '<li>Error al cargar tareas.</li>';
+          console.error(error);
+        });
+    }
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const descripcion = document.getElementById("descripcion").value;
+      fetch('/api/agregar.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descripcion })
       })
-      .catch(error => {
-        document.getElementById('lista-tareas').innerHTML = '<li>Error al cargar tareas.</li>';
-        console.error('Error:', error);
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("descripcion").value = "";
+        cargarTareas();
       });
+    });
+
+    cargarTareas();
   </script>
 </body>
 </html>
